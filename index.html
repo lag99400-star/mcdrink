@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCDrink Remote</title>
+<style>
+:root{color-scheme:dark;--bg:#080c14;--panel:#111a2a;--line:#26344b;--text:#e8eefc;--muted:#9aabc6;--blue:#78aaff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif;min-height:100vh}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}header b{font-size:18px}.logo{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#78aaff,#9b75ff);color:#07101e;font-weight:800}
+main{max-width:1050px;margin:30px auto;padding:0 18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:18px}h1{font-size:23px;margin:0 0 6px}p{color:var(--muted);margin:6px 0 16px}.connect{display:flex;gap:10px;flex-wrap:wrap}input{flex:1;min-width:220px;background:#080c14;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}button,a.button{border:0;border-radius:10px;padding:12px 16px;background:linear-gradient(135deg,#78aaff,#9b75ff);color:#07101e;font-weight:700;font:inherit;text-decoration:none;cursor:pointer}.hint{font-size:13px}.framewrap{display:none;height:75vh;min-height:520px;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel)}iframe{border:0;width:100%;height:100%;background:#080c14}.bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 2px}.bar span{color:var(--muted);font-size:13px;overflow-wrap:anywhere}.small{background:transparent;color:var(--text);border:1px solid var(--line);padding:8px 11px}
+</style>
+</head>
+<body>
+<header><div class="logo">MD</div><b>MCDrink Remote</b></header>
+<main>
+<section class="panel" id="setup">
+<h1>Connect to your running MCDrink</h1>
+<p>This GitHub page is the launcher. Your MCDrink script must be running and reachable through your protected HTTPS tunnel.</p>
+<div class="connect"><input id="endpoint" type="url" placeholder="https://your-private-tunnel.example" autocomplete="url"><button id="connect">Connect</button></div>
+<p class="hint">Use the address for <code>secure-site.js</code> (port 8787), not the bot’s port 8080. The browser will ask for your site login. The address is saved only in this browser.</p>
+</section>
+<div id="connected" style="display:none"><div class="bar"><span id="where"></span><div><button class="small" id="open">Open in new tab</button> <button class="small" id="change">Change connection</button></div></div><div class="framewrap" id="framewrap"><iframe id="remote" title="MCDrink control panel" referrerpolicy="no-referrer"></iframe></div></div>
+</main>
+<script>
+const input=document.getElementById('endpoint'), setup=document.getElementById('setup'), connected=document.getElementById('connected'), frame=document.getElementById('remote'), wrap=document.getElementById('framewrap');
+function normalize(raw){const u=new URL(raw);if(u.protocol!=='https:'&&u.hostname!=='localhost'&&u.hostname!=='127.0.0.1')throw Error('Use an HTTPS tunnel address.');if(u.username||u.password)throw Error('Do not put login details in the address.');return u.origin;}
+function show(raw){let url;try{url=normalize(raw)}catch(e){alert(e.message);return}localStorage.setItem('mcdrink_endpoint',url);input.value=url;document.getElementById('where').textContent='Connected to '+url;frame.src=url;document.getElementById('open').onclick=()=>window.open(url,'_blank','noopener');setup.style.display='none';connected.style.display='block';wrap.style.display='block';}
+document.getElementById('connect').onclick=()=>show(input.value.trim());document.getElementById('change').onclick=()=>{frame.src='about:blank';connected.style.display='none';setup.style.display='block'};input.addEventListener('keydown',e=>{if(e.key==='Enter')show(input.value.trim())});const saved=localStorage.getItem('mcdrink_endpoint');if(saved)show(saved);
+</script>
+</body>
+</html>
